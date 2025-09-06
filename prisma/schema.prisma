@@ -57,6 +57,8 @@ model School {
   establishedDate DateTime?
   createdBy       String?
   updatedBy       String?
+  // Opposite relations
+  registrations   StudentRegistration[]
 }
 
 model Department {
@@ -66,6 +68,8 @@ model Department {
   description String?
   staffs      Staff[]  @relation("DepartmentStaff")
   subjects    Subject[]
+  // Opposite relations
+  registrations StudentRegistration[]
   }
   model Staff {
   id           Int        @id @default(autoincrement())
@@ -108,6 +112,8 @@ model Class {
   classTeacherId Int?
   sections      Section[] @relation("ClassSections")
   curriculums   Curriculum[]
+  // Opposite relations
+  registrations StudentRegistration[]
 }
 
 model Section {
@@ -117,6 +123,8 @@ model Section {
   classId   Int
   name      String
   capacity  Int?
+  // Opposite relations
+  registrations StudentRegistration[]
 }
 
 model Subject {
@@ -128,6 +136,7 @@ model Subject {
   creditHours Int?
   department  Department?     @relation(fields: [departmentId], references: [id])
   departmentId Int?
+  curricula  Curriculum[] // 👈 opposite relation
    
 }
 
@@ -142,17 +151,23 @@ model AcademicYear {
   startDate   DateTime?
   endDate     DateTime?
   status      AcademicYearStatus @default(ACTIVE)
-   
+   curricula    Curriculum[]  // 👈 opposite relation
+  registrations StudentRegistration[] 
+  terms        Term[]
 }
 //
 model Term {
-  id             Int      @id @default(autoincrement())
-  username       String   @unique
-  
-  name           String
-  startPeriod   String?  // JAN-MAY
-  endPeroid     String?  // SEP-AUG
-   
+  id              Int         @id @default(autoincrement())
+  username        String      @unique
+  name            String
+  startDate       DateTime?
+  endDate         DateTime?
+  status          TermStatus  @default(ACTIVE)
+
+  academicYear    AcademicYear? @relation(fields: [academicYearId], references: [id])
+  academicYearId  Int?
+  curricula    Curriculum[]  // 👈 opposite relation
+  registrations StudentRegistration[]
 }
 // SUBJECT CLASS LINK
 model Curriculum {
@@ -160,14 +175,19 @@ model Curriculum {
   username      String       @unique
   academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
   academicYearId Int
-  term          Term         @relation(fields: [termId], references:[id])
-  termId        Int 
-  class         Class        @relation(fields: [classId], references: [id])
-  classId       Int
+  term          Term         @relation(fields: [termId], references: [id])
+  termId        Int
   subject       Subject      @relation(fields: [subjectId], references: [id])
   subjectId     Int
+  classId       Int
+  class         Class        @relation(fields: [classId], references: [id])
 
+  // Opposite relations
+  studentRegistrations StudentRegistration[]
+  studentCurriculums   StudentCurriculum[]
 }
+
+
 //
 model StudentApplication {
   id              Int      @id @default(autoincrement())
@@ -228,6 +248,21 @@ model Student {
   updatedAt     DateTime  @updatedAt
 }
 
+model StudentGuardian {
+  id             Int      @id @default(autoincrement())
+  student        Student  @relation(fields: [studentId], references: [id])
+  studentId      Int
+
+  name           String
+  relation       String?
+  contactNumber  String?
+  email          String?
+  address        String?
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+}
+
 model StudentRegistration {
   id              Int       @id @default(autoincrement())
   username        String    @unique
@@ -259,7 +294,7 @@ model StudentRegistration {
   curriculums   StudentCurriculum[]   // links registration to subjects
 
   createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt,
+  updatedAt     DateTime @updatedAt
   curriculum           Curriculum         @relation(fields: [curriculumId], references: [id])
   curriculumId         Int
 }

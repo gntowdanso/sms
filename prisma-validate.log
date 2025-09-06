@@ -1,0 +1,98 @@
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+
+Error: Prisma schema validation - (validate wasm)
+Error code: P1012
+error: Error validating field `academicYear` in model `Curriculum`: The relation field `academicYear` on model `Curriculum` is missing an opposite relation field on the model `AcademicYear`. Either run `prisma format` or add it manually.
+  -->  prisma\schema.prisma:161
+   | 
+160 |   username      String       @unique
+161 |   academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
+
+162 |   academicYearId Int
+   | 
+error: Error validating field `term` in model `Curriculum`: The relation field `term` on model `Curriculum` is missing an opposite relation field on the model `Term`. Either run `prisma format` or add it manually.
+  -->  prisma\schema.prisma:163
+   | 
+162 |   academicYearId Int
+163 |   term          Term         @relation(fields: [termId], references:[id])
+
+164 |   termId        Int 
+   | 
+error: Error validating field `subject` in model `Curriculum`: The relation field `subject` on model `Curriculum` is missing an opposite relation field on the model `Subject`. Either run `prisma format` or add it manually.
+  -->  prisma\schema.prisma:167
+   | 
+166 |   classId       Int
+167 |   subject       Subject      @relation(fields: [subjectId], references: [id])
+
+168 |   subjectId     Int
+   | 
+error: Error validating field `school` in model `StudentRegistration`: The relation field `school` on model `StudentRegistration` is missing an opposite relation field on the model `School`. Either run `prisma format` or add it manually.
+  -->  prisma\schema.prisma:256
+   | 
+255 | 
+256 |   school        School      @relation(fields: [schoolId], references: [id])
+
+257 |   schoolId      Int
+   | 
+error: Error validating field `department` in model `StudentRegistration`: The relation field `department` on model `StudentRegistration` is missing an opposite relation field on the model `Department`. Either run `prisma format` or add it manually.
+  -->  prisma\schema.prisma:259
+   | 
+258 | 
+259 |   department    Department? @relation(fields: [departmentId], references: [id])
+
+260 |   departmentId  Int?
+   | 
+error: Error validating field `class` in model `StudentRegistration`: The relation field `class` on model `StudentRegistration` is missing an opposite relation field on the model `Class`. Either run `prisma format` or add it manually.
+  -->  prisma\schema.prisma:262
+   | 
+261 | 
+262 |   class         Class?      @relation(fields: [classId], references: [id])
+
+263 |   classId       Int?
+   | 
+error: Error validating field `section` in model `StudentRegistration`: The relation field `section` on model `StudentRegistration` is missing an opposite relation field on the model `Section`. Either run `prisma format` or add it manually.
+  -->  prisma\schema.prisma:265
+   | 
+264 | 
+265 |   section       Section?    @relation(fields: [sectionId], references: [id])
+
+266 |   sectionId     Int?
+   | 
+error: Error validating field `academicYear` in model `StudentRegistration`: The relation field `academicYear` on model `StudentRegistration` is missing an opposite relation field on the model `AcademicYear`. Either run `prisma format` or add it manually.
+  -->  prisma\schema.prisma:268
+   | 
+267 | 
+268 |   academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
+
+269 |   academicYearId Int
+   | 
+error: Error validating field `term` in model `StudentRegistration`: The relation field `term` on model `StudentRegistration` is missing an opposite relation field on the model `Term`. Either run `prisma format` or add it manually.
+  -->  prisma\schema.prisma:271
+   | 
+270 | 
+271 |   term          Term @relation(fields: [termId], references: [id])
+
+272 |   termId        Int
+   | 
+error: Error validating field `curriculum` in model `StudentRegistration`: The relation field `curriculum` on model `StudentRegistration` is missing an opposite relation field on the model `Curriculum`. Either run `prisma format` or add it manually.
+  -->  prisma\schema.prisma:278
+   | 
+277 |   updatedAt     DateTime @updatedAt
+278 |   curriculum           Curriculum         @relation(fields: [curriculumId], references: [id])
+
+279 |   curriculumId         Int
+   | 
+error: Error validating field `curriculum` in model `StudentCurriculum`: The relation field `curriculum` on model `StudentCurriculum` is missing an opposite relation field on the model `Curriculum`. Either run `prisma format` or add it manually.
+  -->  prisma\schema.prisma:288
+   | 
+287 | 
+288 |   curriculum           Curriculum         @relation(fields: [curriculumId], references: [id])
+
+289 |   curriculumId         Int
+   | 
+
+Validation Error Count: 11
+[Context: validate]
+
+Prisma CLI Version : 6.15.0

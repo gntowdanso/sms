@@ -1,0 +1,19 @@
+
+> smsapp2025@0.1.0 prebuild
+> prisma generate
+
+Environment variables loaded from .env
+Prisma schema loaded from prisma\schema.prisma
+Error: Prisma schema validation - (get-dmmf wasm)
+Error code: P1012
+error: Type "StudentGuardian" is neither a built-in type, nor refers to another model, composite type, or enum.
+  -->  prisma\schema.prisma:225
+   | 
+224 |   registrations StudentRegistration[]
+225 |   guardians     StudentGuardian[]
+   | 
+
+Validation Error Count: 1
+[Context: getDmmf]
+
+Prisma CLI Version : 6.15.0

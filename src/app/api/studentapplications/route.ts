@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-const prisma: any = new PrismaClient();
+import { getPrisma } from '../../../lib/prisma'
+let prisma: any = null
 
 function parseRoleFromHeaders(req: Request) {
   try {
@@ -23,14 +23,15 @@ function requireMutatingRole(req: Request) {
 
 export async function GET(req: Request) {
   try {
-    const { searchParams } = new URL(req.url);
+  const { searchParams } = new URL(req.url);
+  if (!prisma) prisma = await getPrisma()
     const id = searchParams.get('id');
     if (id) {
       const item = await prisma.studentApplication.findUnique({ where: { id: Number(id) } });
       if (!item) return NextResponse.json({ error: 'Not found' }, { status: 404 });
       return NextResponse.json(item);
     }
-    const list = await prisma.studentApplication.findMany();
+  const list = await prisma.studentApplication.findMany();
     return NextResponse.json(list);
   } catch (err) {
     console.error('GET /api/studentapplications error', err);
@@ -55,7 +56,7 @@ export async function POST(req: Request) {
       username = `${base}-${attempt}`;
     }
     const data: any = { username, firstName: String(firstName).trim(), lastName: String(lastName).trim(), otherNames: otherNames || null, dateOfBirth: dateOfBirth ? new Date(dateOfBirth) : null, gender: gender || null, address: address || null, email: email || null, contactNumber: contactNumber || null, previousSchool: previousSchool || null, intendedClass: intendedClass || null, guardianName: guardianName || null, guardianContact: guardianContact || null };
-    const created = await prisma.studentApplication.create({ data });
+  const created = await prisma.studentApplication.create({ data });
     return NextResponse.json(created);
   } catch (err) {
     console.error('POST /api/studentapplications error', err);
@@ -84,7 +85,7 @@ export async function PUT(req: Request) {
     if (intendedClass !== undefined) data.intendedClass = intendedClass || null;
     if (guardianName !== undefined) data.guardianName = guardianName || null;
     if (guardianContact !== undefined) data.guardianContact = guardianContact || null;
-    const updated = await prisma.studentApplication.update({ where: { id: parsedId }, data });
+  const updated = await prisma.studentApplication.update({ where: { id: parsedId }, data });
     return NextResponse.json(updated);
   } catch (err) {
     console.error('PUT /api/studentapplications error', err);
@@ -99,7 +100,7 @@ export async function DELETE(req: Request) {
     const body = await req.json();
     const id = Number(body?.id);
     if (Number.isNaN(id)) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
-    await prisma.studentApplication.delete({ where: { id } });
+  await prisma.studentApplication.delete({ where: { id } });
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error('DELETE /api/studentapplications error', err);
