@@ -1,0 +1,278 @@
+// Prisma schema for School Management System
+// Database: PostgreSQL
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model UserAccount {
+  id           Int      @id @default(autoincrement())
+  username     String   @unique
+  passwordHash String
+  role         Role     @relation(fields: [roleId], references: [id])
+  roleId       Int
+  lastLogin    DateTime?
+  isActive     Boolean  @default(true)
+}
+
+model Role {
+  id          Int      @id @default(autoincrement())
+  roleName    String   @unique
+  description String?
+  users       UserAccount[]
+}
+
+enum SchoolType {
+  BASIC
+  SECONDARY
+  TERTIARY
+}
+
+enum StaffRole {
+  ADMIN
+  FINANCE
+  SECURITY
+  LIBRARIAN
+  TEACHER_LEAD
+}
+
+enum StaffType {
+  TEACHER
+  NON_TEACHER
+}
+
+model School {
+  id              Int        @id @default(autoincrement())
+  username        String     @unique
+  name            String
+  address         String?
+  contactInfo     String?
+  type            SchoolType
+  accreditationNo String?
+  establishedDate DateTime?
+  createdBy       String?
+  updatedBy       String?
+}
+
+model Department {
+  id          Int      @id @default(autoincrement())
+  username    String   @unique
+  name        String
+  description String?
+  staffs      Staff[]  @relation("DepartmentStaff")
+  subjects    Subject[]
+  }
+  model Staff {
+  id           Int        @id @default(autoincrement())
+  username     String      
+  staffNo      String     @unique
+  firstName    String
+  lastName     String
+  role         StaffRole
+  staffType    StaffType
+  department   Department? @relation("DepartmentStaff", fields: [departmentId], references: [id])
+  departmentId Int?
+  contactInfo  String?
+  email        String?
+  employmentDate DateTime?
+  teachingClasses Class[] @relation("ClassTeacher")
+}
+
+enum SubjectCategory {
+  CORE
+  ELECTIVE
+}
+
+enum AcademicYearStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum TermStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model Class {
+  id            Int      @id @default(autoincrement())
+  username      String   @unique
+  name          String
+  section       String? 
+  capacity      Int?
+  classTeacher  Staff?   @relation("ClassTeacher", fields: [classTeacherId], references: [id])
+  classTeacherId Int?
+  sections      Section[] @relation("ClassSections")
+  curriculums   Curriculum[]
+}
+
+model Section {
+  id        Int    @id @default(autoincrement())
+  username  String @unique
+  class     Class  @relation("ClassSections", fields: [classId], references: [id])
+  classId   Int
+  name      String
+  capacity  Int?
+}
+
+model Subject {
+  id          Int             @id @default(autoincrement())
+  username    String          @unique
+  name        String
+  code        String?
+  category    SubjectCategory
+  creditHours Int?
+  department  Department?     @relation(fields: [departmentId], references: [id])
+  departmentId Int?
+   
+}
+
+ 
+
+
+
+model AcademicYear {
+  id          Int       @id @default(autoincrement())
+  username    String    @unique
+  yearName    String
+  startDate   DateTime?
+  endDate     DateTime?
+  status      AcademicYearStatus @default(ACTIVE)
+   
+}
+//
+model Term {
+  id             Int      @id @default(autoincrement())
+  username       String   @unique
+  
+  name           String
+  startPeriod   String?  // JAN-MAY
+  endPeroid     String?  // SEP-AUG
+   
+}
+// SUBJECT CLASS LINK
+model Curriculum {
+  id            Int          @id @default(autoincrement())
+  username      String       @unique
+  academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
+  academicYearId Int
+  term          Term         @relation(fields: [termId], references:[id])
+  termId        Int 
+  class         Class        @relation(fields: [classId], references: [id])
+  classId       Int
+  subject       Subject      @relation(fields: [subjectId], references: [id])
+  subjectId     Int
+
+}
+//
+model StudentApplication {
+  id              Int      @id @default(autoincrement())
+  username        String   @unique
+  firstName       String
+  lastName        String
+  otherNames      String?
+  dateOfBirth     DateTime?
+  gender          String?
+  address         String?
+  email           String?
+  contactNumber   String?
+  previousSchool  String?
+  intendedClass   String?
+  guardianName    String?
+  guardianContact String?
+  applicationDate DateTime @default(now())
+  status          String   @default("PENDING") // PENDING, ACCEPTED, REJECTED
+}
+
+model Student {
+  id              Int       @id @default(autoincrement())
+  username        String    @unique
+  studentNo       String    @unique
+  firstName       String
+  lastName        String
+  otherNames      String?
+  dateOfBirth     DateTime?
+  gender          String?
+  address         String?
+  email           String?
+  contactNumber   String?
+
+  // Extended Bio
+  nationality      String?
+  placeOfBirth     String?
+  religion         String?
+  bloodGroup       String?
+  medicalHistory   String?
+  allergies        String?
+  disability       String?
+
+  // Previous School Information
+  previousSchool   String?
+  previousClass    String?
+  transferReason   String?
+
+  // Emergency Contact
+  emergencyName     String?
+  emergencyContact  String?
+  emergencyRelation String?
+
+  // Relations
+  registrations StudentRegistration[]
+  guardians     StudentGuardian[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model StudentRegistration {
+  id              Int       @id @default(autoincrement())
+  username        String    @unique
+  student       Student     @relation(fields: [studentId], references: [id])
+  studentId     Int
+  status          String?   // PROMOTED, REPEATED, WITHDRAWN
+
+  // Relations
+  
+
+  school        School      @relation(fields: [schoolId], references: [id])
+  schoolId      Int
+
+  department    Department? @relation(fields: [departmentId], references: [id])
+  departmentId  Int?
+
+  class         Class?      @relation(fields: [classId], references: [id])
+  classId       Int?
+
+  section       Section?    @relation(fields: [sectionId], references: [id])
+  sectionId     Int?
+
+  academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
+  academicYearId Int
+
+  term          Term @relation(fields: [termId], references: [id])
+  termId        Int
+
+  curriculums   StudentCurriculum[]   // links registration to subjects
+
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt,
+  curriculum           Curriculum         @relation(fields: [curriculumId], references: [id])
+  curriculumId         Int
+}
+
+
+model StudentCurriculum {
+  id                   Int                @id @default(autoincrement())
+  studentRegistration  StudentRegistration @relation(fields: [studentRegistrationId], references: [id])
+  studentRegistrationId Int
+
+  curriculum           Curriculum         @relation(fields: [curriculumId], references: [id])
+  curriculumId         Int
+
+  isActive             Boolean            @default(true)
+  createdAt            DateTime           @default(now())
+}
