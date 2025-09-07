@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { getPrisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
 
-const prisma = new PrismaClient();
+// prisma is obtained lazily per request to avoid initialization issues during build
 
 export async function POST(req: NextRequest) {
+  const prisma = await getPrisma();
   try {
     const { username, password } = await req.json();
     if (!username || !password) {
@@ -21,7 +22,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: 'Invalid credentials' }, { status: 401 });
     }
 
-    await prisma.userAccount.update({
+  await prisma.userAccount.update({
       where: { id: user.id },
       data: { lastLogin: new Date() },
     });

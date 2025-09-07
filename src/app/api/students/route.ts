@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-const prisma: any = new PrismaClient();
+import { getPrisma } from '@/lib/prisma';
+let prisma: any;
 
 function parseRoleFromHeaders(req: Request) {
   try {
@@ -23,6 +23,7 @@ function requireMutatingRole(req: Request) {
 
 export async function GET(req: Request) {
   try {
+  if (!prisma) prisma = await getPrisma();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
     if (id) {
@@ -40,6 +41,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+  if (!prisma) prisma = await getPrisma();
     const check = requireMutatingRole(req);
     if (!check.ok) return NextResponse.json({ error: check.reason }, { status: 401 });
     const body = await req.json();
@@ -92,6 +94,7 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
+  if (!prisma) prisma = await getPrisma();
     const check = requireMutatingRole(req);
     if (!check.ok) return NextResponse.json({ error: check.reason }, { status: 401 });
     const body = await req.json();
@@ -121,6 +124,7 @@ export async function PUT(req: Request) {
 
 export async function DELETE(req: Request) {
   try {
+  if (!prisma) prisma = await getPrisma();
     const check = requireMutatingRole(req);
     if (!check.ok) return NextResponse.json({ error: check.reason }, { status: 401 });
     const body = await req.json();

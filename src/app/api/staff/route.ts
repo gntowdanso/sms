@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { getPrisma } from '@/lib/prisma';
 
-// Cast to any to avoid TypeScript binding issues with generated client types in the workspace
-const prisma: any = new PrismaClient();
+// Lazy prisma to avoid build-time initialization issues
+let prisma: any;
 
 export async function GET(req: Request) {
+  if (!prisma) prisma = await getPrisma();
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
   if (id) {
@@ -16,6 +17,7 @@ export async function GET(req: Request) {
 }
 
 export async function POST(req: Request) {
+  if (!prisma) prisma = await getPrisma();
   const body = await req.json();
   const payload: any = { ...body };
   // map userName -> username if provided by client
@@ -66,6 +68,7 @@ export async function POST(req: Request) {
 }
 
 export async function PUT(req: Request) {
+  if (!prisma) prisma = await getPrisma();
   const body = await req.json();
   const { id, ...rest } = body;
   const payload: any = { ...rest };
@@ -93,6 +96,7 @@ export async function PUT(req: Request) {
 }
 
 export async function DELETE(req: Request) {
+  if (!prisma) prisma = await getPrisma();
   const body = await req.json();
   const { id } = body;
   await prisma.staff.delete({ where: { id: Number(id) } });

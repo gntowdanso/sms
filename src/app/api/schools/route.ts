@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
+import { getPrisma } from '@/lib/prisma';
 
-// Cast to any to avoid TypeScript binding issues with generated client types in the workspace
-const prisma: any = new PrismaClient();
+// obtain prisma lazily to avoid init errors during build/deploy
+let prisma: any;
 
 function parseRoleFromHeaders(req: Request) {
   try {
@@ -24,6 +24,7 @@ function requireMutatingRole(req: Request) {
 }
 
 export async function GET(req: Request) {
+  if (!prisma) prisma = await getPrisma();
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
   if (id) {
@@ -36,6 +37,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+  if (!prisma) prisma = await getPrisma();
     const check = requireMutatingRole(req);
     if (!check.ok) return NextResponse.json({ error: check.reason }, { status: 401 });
 
@@ -64,6 +66,7 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
+  if (!prisma) prisma = await getPrisma();
     const check = requireMutatingRole(req);
     if (!check.ok) return NextResponse.json({ error: check.reason }, { status: 401 });
 
@@ -96,6 +99,7 @@ export async function PUT(req: Request) {
 export async function DELETE(req: Request) 
 {
   try {
+  if (!prisma) prisma = await getPrisma();
     const check = requireMutatingRole(req);
     if (!check.ok) return NextResponse.json({ error: check.reason }, { status: 401 });
 

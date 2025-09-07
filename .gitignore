@@ -9,11 +9,12 @@
 !.yarn/plugins
 !.yarn/releases
 !.yarn/versions
-
+prisma/
+!prisma/schema.prisma
+!prisma/migrations/**
 # testing
 /coverage
-prisma/*.db
-prisma/*.db-journal
+ 
 
 # misc
 .DS_Store

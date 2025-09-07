@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
-import { PrismaClient } from '@prisma/client';
-const prisma: any = new PrismaClient();
+import { getPrisma } from '@/lib/prisma';
+let prisma: any;
 
 function parseRoleFromHeaders(req: Request) {
   try { const roleHeader = req.headers.get('x-user-role'); if (!roleHeader) return null; const role = Number(roleHeader); if (Number.isNaN(role)) return null; return role; } catch (e) { return null; }
@@ -9,6 +9,7 @@ function requireMutatingRole(req: Request) { const role = parseRoleFromHeaders(r
 
 export async function GET(req: Request) {
   try {
+  if (!prisma) prisma = await getPrisma();
     const { searchParams } = new URL(req.url);
     const id = searchParams.get('id');
     if (id) {
@@ -26,6 +27,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
+  if (!prisma) prisma = await getPrisma();
     const check = requireMutatingRole(req); if (!check.ok) return NextResponse.json({ error: check.reason }, { status: 401 });
     const body = await req.json();
     const { name, section, capacity, classTeacherId } = body || {};
@@ -45,6 +47,7 @@ export async function POST(req: Request) {
 
 export async function PUT(req: Request) {
   try {
+  if (!prisma) prisma = await getPrisma();
     const check = requireMutatingRole(req); if (!check.ok) return NextResponse.json({ error: check.reason }, { status: 401 });
     const body = await req.json(); const { id, name, section, capacity, classTeacherId } = body || {};
     const parsedId = Number(id); if (Number.isNaN(parsedId)) return NextResponse.json({ error: 'Missing id' }, { status: 400 });
@@ -59,5 +62,5 @@ export async function PUT(req: Request) {
 }
 
 export async function DELETE(req: Request) {
-  try { const check = requireMutatingRole(req); if (!check.ok) return NextResponse.json({ error: check.reason }, { status: 401 }); const body = await req.json(); const id = Number(body?.id); if (Number.isNaN(id)) return NextResponse.json({ error: 'Missing id' }, { status: 400 }); await prisma.class.delete({ where: { id } }); return NextResponse.json({ success: true }); } catch (err) { console.error('DELETE /api/classes error', err); return NextResponse.json({ error: 'Internal server error' }, { status: 500 }); }
+  try { if (!prisma) prisma = await getPrisma(); const check = requireMutatingRole(req); if (!check.ok) return NextResponse.json({ error: check.reason }, { status: 401 }); const body = await req.json(); const id = Number(body?.id); if (Number.isNaN(id)) return NextResponse.json({ error: 'Missing id' }, { status: 400 }); await prisma.class.delete({ where: { id } }); return NextResponse.json({ success: true }); } catch (err) { console.error('DELETE /api/classes error', err); return NextResponse.json({ error: 'Internal server error' }, { status: 500 }); }
 }
