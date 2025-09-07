@@ -48,7 +48,7 @@ enum StaffType {
 
 model School {
   id              Int        @id @default(autoincrement())
-  username        String     @unique
+  username        String     
   name            String
   address         String?
   contactInfo     String?
@@ -63,7 +63,7 @@ model School {
 
 model Department {
   id          Int      @id @default(autoincrement())
-  username    String   @unique
+  username    String   
   name        String
   description String?
   staffs      Staff[]  @relation("DepartmentStaff")
@@ -104,7 +104,7 @@ enum TermStatus {
 
 model Class {
   id            Int      @id @default(autoincrement())
-  username      String   @unique
+  username      String   
   name          String
   section       String? 
   capacity      Int?
@@ -118,7 +118,7 @@ model Class {
 
 model Section {
   id        Int    @id @default(autoincrement())
-  username  String @unique
+  username  String 
   class     Class  @relation("ClassSections", fields: [classId], references: [id])
   classId   Int
   name      String
@@ -129,7 +129,7 @@ model Section {
 
 model Subject {
   id          Int             @id @default(autoincrement())
-  username    String          @unique
+  username    String          
   name        String
   code        String?
   category    SubjectCategory
@@ -137,6 +137,8 @@ model Subject {
   department  Department?     @relation(fields: [departmentId], references: [id])
   departmentId Int?
   curricula  Curriculum[] // 👈 opposite relation
+  // Back-relations
+  reportCardDetails ReportCardDetail[]
    
 }
 
@@ -146,7 +148,7 @@ model Subject {
 
 model AcademicYear {
   id          Int       @id @default(autoincrement())
-  username    String    @unique
+  username    String    
   yearName    String
   startDate   DateTime?
   endDate     DateTime?
@@ -154,11 +156,28 @@ model AcademicYear {
    curricula    Curriculum[]  // 👈 opposite relation
   registrations StudentRegistration[] 
   terms        Term[]
+  // Back-relations for academic entities
+  assessments        Assessment[]
+  examPapers         ExamPaper[]
+  assessmentResults  AssessmentResult[]
+  attendances        Attendance[]
+  assignments        Assignment[]
+  assignmentSubmissions AssignmentSubmission[]
+  reportCards        ReportCard[]
+  promotionRecords   PromotionRecord[]
+  // Finance back-relations
+  feeStructures      FeeStructure[]
+  invoices           Invoice[]
+  fines              Fine[]
+  financialReports   FinancialReport[]
+  // Accounting back-relations
+  journalEntries     JournalEntry[]
+  ledgers            Ledger[]
 }
 //
 model Term {
   id              Int         @id @default(autoincrement())
-  username        String      @unique
+  username        String      
   name            String
   startDate       DateTime?
   endDate         DateTime?
@@ -168,11 +187,28 @@ model Term {
   academicYearId  Int?
   curricula    Curriculum[]  // 👈 opposite relation
   registrations StudentRegistration[]
+  // Back-relations for academic entities
+  assessments        Assessment[]
+  examPapers         ExamPaper[]
+  assessmentResults  AssessmentResult[]
+  attendances        Attendance[]
+  assignments        Assignment[]
+  assignmentSubmissions AssignmentSubmission[]
+  reportCards        ReportCard[]
+  promotionRecords   PromotionRecord[]
+  // Finance back-relations
+  feeStructures      FeeStructure[]
+  invoices           Invoice[]
+  fines              Fine[]
+  financialReports   FinancialReport[]
+  // Accounting back-relations
+  journalEntries     JournalEntry[]
+  ledgers            Ledger[]
 }
 // SUBJECT CLASS LINK
 model Curriculum {
   id            Int          @id @default(autoincrement())
-  username      String       @unique
+  username      String       
   academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
   academicYearId Int
   term          Term         @relation(fields: [termId], references: [id])
@@ -183,7 +219,6 @@ model Curriculum {
   class         Class        @relation(fields: [classId], references: [id])
 
   // Opposite relations
-  studentRegistrations StudentRegistration[]
   studentCurriculums   StudentCurriculum[]
 }
 
@@ -191,7 +226,7 @@ model Curriculum {
 //
 model StudentApplication {
   id              Int      @id @default(autoincrement())
-  username        String   @unique
+  username        String   
   firstName       String
   lastName        String
   otherNames      String?
@@ -210,7 +245,7 @@ model StudentApplication {
 
 model Student {
   id              Int       @id @default(autoincrement())
-  username        String    @unique
+  username        String    
   studentNo       String    @unique
   firstName       String
   lastName        String
@@ -243,6 +278,7 @@ model Student {
   // Relations
   registrations StudentRegistration[]
   guardians     StudentGuardian[]
+  reportCards   ReportCard[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -265,7 +301,7 @@ model StudentGuardian {
 
 model StudentRegistration {
   id              Int       @id @default(autoincrement())
-  username        String    @unique
+  username        String    
   student       Student     @relation(fields: [studentId], references: [id])
   studentId     Int
   status          String?   // PROMOTED, REPEATED, WITHDRAWN
@@ -295,8 +331,7 @@ model StudentRegistration {
 
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
-  curriculum           Curriculum         @relation(fields: [curriculumId], references: [id])
-  curriculumId         Int
+  // Direct Curriculum relation removed; use StudentCurriculum join table instead
 }
 
 
@@ -310,4 +345,409 @@ model StudentCurriculum {
 
   isActive             Boolean            @default(true)
   createdAt            DateTime           @default(now())
+}
+
+/////  STUDENT  PERFORMACE Section
+enum ExamType {
+  MIDTERM
+  FINAL
+  OTHERS
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+  EXCUSED
+}
+
+ 
+
+enum InvoiceStatus {
+  PAID
+  UNPAID
+  PARTIAL
+}
+
+enum PaymentMethod {
+  CASH
+  BANK
+  MOBILEMONEY
+}
+
+enum ScholarshipType {
+  SCHOLARSHIP
+  FEEWAIVER
+  DISCOUNT
+}
+
+// Expense categories used by the Expense model
+enum ExpenseCategory {
+  OPERATIONS
+  MAINTENANCE
+  UTILITIES
+  SALARIES
+  SUPPLIES
+  OTHER
+}
+
+ 
+ 
+ 
+
+//
+// 📝 Academic Performance Entities 
+//
+
+model AssessmentType {
+  id          Int     @id @default(autoincrement())
+  username    String
+  name        String   // e.g., Exam, Assignment, Quiz, Project, Homework, Attendance
+  percentage  Float    // weight contribution (e.g., Exam = 60, Assignment = 10)
+  description String?  // optional notes
+
+  assessments Assessment[]
+}
+
+model Assessment {
+  id              Int     @id @default(autoincrement())
+  username        String
+  title           String?   // e.g., "Midterm Exam", "Math Quiz 1"
+  description     String?
+  date            DateTime?
+  classId         Int?
+  subjectId       Int?
+  teacherId       Int?
+  assessmentTypeId Int
+ academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
+  academicYearId Int
+  term          Term         @relation(fields: [termId], references: [id])
+  termId        Int
+  assessmentType AssessmentType @relation(fields: [assessmentTypeId], references: [id])
+  results        AssessmentResult[]
+  examPapers     ExamPaper[]
+  reportCardDetails ReportCardDetail[]
+}
+
+model ExamPaper {
+  id          Int     @id @default(autoincrement())
+  username    String
+  assessmentId Int
+  subjectId   Int
+  teacherId   Int
+  maxMarks    Int
+   academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
+  academicYearId Int
+  term          Term         @relation(fields: [termId], references: [id])
+  termId        Int
+  assessment Assessment     @relation(fields: [assessmentId], references: [id])
+  results    AssessmentResult[]
+}
+
+model AssessmentResult {
+  id            Int     @id @default(autoincrement())
+  username      String
+  assessmentId  Int
+  examPaperId   Int?
+  studentId     Int
+  marksObtained Float?
+  gradeId       Int?
+  remarks       String?
+  academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
+  academicYearId Int
+  term          Term         @relation(fields: [termId], references: [id])
+  termId        Int
+  assessment Assessment   @relation(fields: [assessmentId], references: [id])
+  examPaper  ExamPaper?   @relation(fields: [examPaperId], references: [id])
+  grade      GradingScheme? @relation(fields: [gradeId], references: [id])
+}
+
+model GradingScheme {
+  id       Int    @id @default(autoincrement())
+  username String
+  minMark  Int
+  maxMark  Int
+  grade    String
+  remarks  String?
+  results  AssessmentResult[]
+}
+
+
+model Attendance {
+  id        Int              @id @default(autoincrement())
+  username  String
+  studentId Int
+  classId   Int
+  date      DateTime
+  status    AttendanceStatus
+  teacherId Int
+  academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
+  academicYearId Int
+  term          Term         @relation(fields: [termId], references: [id])
+  termId        Int
+}
+
+model Assignment {
+  id          Int    @id @default(autoincrement())
+  username    String
+  title       String
+  description String?
+  classId     Int
+  subjectId   Int
+  teacherId   Int
+  dueDate     DateTime
+
+  submissions AssignmentSubmission[]
+  academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
+  academicYearId Int
+  term          Term         @relation(fields: [termId], references: [id])
+  termId        Int
+}
+
+model AssignmentSubmission {
+  id            Int    @id @default(autoincrement())
+  username      String
+  assignmentId  Int
+  studentId     Int
+  submittedDate DateTime
+  fileUrl       String?
+  marks         Int?
+  feedback      String?
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id])
+academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
+  academicYearId Int
+  term          Term         @relation(fields: [termId], references: [id])
+  termId        Int
+}
+
+model ReportCard {
+  id             Int      @id @default(autoincrement())
+  username       String
+  studentId      Int
+ 
+  overallGrade   String
+  totalMarks     Int
+  averageMarks   Float
+  position       Int?        // e.g., 5th out of 30
+  remarks        String?     // general remarks
+  teacherRemark  String?     
+  principalRemark String?    
+academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
+  academicYearId Int
+  term          Term         @relation(fields: [termId], references: [id])
+  termId        Int
+  // relations
+  student        Student   @relation(fields: [studentId], references: [id])
+ 
+  results        ReportCardDetail[]
+}
+
+model ReportCardDetail {
+  id           Int    @id @default(autoincrement())
+  reportCardId Int
+  subjectId    Int
+  assessmentId Int?   // Homework/Quiz/Exam reference if needed
+  marksObtained Int
+  grade        String
+
+  reportCard   ReportCard @relation(fields: [reportCardId], references: [id])
+  subject      Subject    @relation(fields: [subjectId], references: [id])
+  assessment   Assessment? @relation(fields: [assessmentId], references: [id])
+}
+
+
+model PromotionRecord {
+  id          Int    @id @default(autoincrement())
+  username    String
+  studentId   Int
+  fromClassId Int
+  toClassId   Int
+  promotionDate DateTime
+  academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
+  academicYearId Int
+  term          Term         @relation(fields: [termId], references: [id])
+  termId        Int
+
+}
+
+//
+// 📝 Fess and Finance Entities 
+//
+
+model FeeItem {
+  id           Int     @id @default(autoincrement())
+  username     String
+  name         String          // e.g., Tuition, PTA Levy, Sports Fee
+  description  String?
+  defaultAmount Float
+  isOptional   Boolean @default(false)
+  // Back-relations
+  feeStructures FeeStructure[]
+  invoiceLines  InvoiceLine[]
+}
+
+model FeeStructure {
+  id             Int    @id @default(autoincrement())
+  username       String
+  classId        Int
+  academicYearId Int
+  termId         Int
+  feeItemId      Int
+  amount         Float
+
+  feeItem        FeeItem @relation(fields: [feeItemId], references: [id])
+  academicYear   AcademicYear @relation(fields: [academicYearId], references: [id])
+  term           Term         @relation(fields: [termId], references: [id])
+}
+
+model Invoice {
+  id          Int    @id @default(autoincrement())
+  username    String
+  studentId   Int
+  termId      Int
+  issueDate   DateTime
+  dueDate     DateTime
+  totalAmount Float
+  status      InvoiceStatus
+
+  lines       InvoiceLine[]
+  payments    Payment[]
+  academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
+  academicYearId Int
+  term          Term         @relation(fields: [termId], references: [id])
+}
+
+model InvoiceLine {
+  id         Int    @id @default(autoincrement())
+  invoiceId  Int
+  feeItemId  Int
+  amount     Float
+
+  invoice    Invoice @relation(fields: [invoiceId], references: [id])
+  feeItem    FeeItem @relation(fields: [feeItemId], references: [id])
+}
+
+model Payment {
+  id          Int    @id @default(autoincrement())
+  username    String
+  invoiceId   Int
+  studentId   Int
+  paymentDate DateTime
+  amountPaid  Float
+  method      PaymentMethod
+  receiptNo   String
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id])
+}
+
+model Scholarship {
+  id             Int    @id @default(autoincrement())
+  username       String
+  studentId      Int
+  type           ScholarshipType
+  amount         Float
+  academicYearId Int
+  termId         Int
+}
+
+model Fine {
+  id        Int    @id @default(autoincrement())
+  username  String
+  studentId Int
+  reason    String
+  amount    Float
+  date      DateTime
+  academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
+  academicYearId Int
+  term          Term         @relation(fields: [termId], references: [id])
+  termId        Int
+}
+
+model Expense {
+  id         Int    @id @default(autoincrement())
+  username   String
+  category   ExpenseCategory
+  amount     Float
+  date       DateTime
+  approvedBy String
+}
+
+model Budget {
+  id             Int    @id @default(autoincrement())
+  username       String
+  academicYearId Int
+  termId         Int
+  category       String
+  plannedAmount  Float
+  actualAmount   Float
+}
+
+model FinancialReport {
+  id             Int    @id @default(autoincrement())
+  username       String
+academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
+  academicYearId Int
+  term          Term         @relation(fields: [termId], references: [id])
+  termId        Int
+  reportTitle    String
+  generatedDate  DateTime
+  fileUrl        String
+}
+
+model AccountType {
+  id       Int    @id @default(autoincrement())
+  name     String   // Asset, Liability, Equity, Revenue, Expense
+  code     String   // e.g., 1000 for Assets, 2000 for Liabilities
+  accounts ChartOfAccount[]
+}
+
+model ChartOfAccount {
+  id           Int    @id @default(autoincrement())
+  username     String
+  accountCode  String
+  accountName  String
+  accountTypeId Int
+
+  accountType  AccountType @relation(fields: [accountTypeId], references: [id])
+  ledgers      Ledger[]
+  journalLines JournalLine[]
+}
+
+model JournalEntry {
+  id          Int    @id @default(autoincrement())
+  date        DateTime
+  description String
+  postedBy    String
+  lines       JournalLine[]
+  academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
+  academicYearId Int
+  term          Term         @relation(fields: [termId], references: [id])
+  termId        Int
+}
+
+model JournalLine {
+  id             Int    @id @default(autoincrement())
+  journalEntryId Int
+  accountId      Int
+  debit          Float @default(0)
+  credit         Float @default(0)
+
+  journalEntry   JournalEntry  @relation(fields: [journalEntryId], references: [id])
+  account        ChartOfAccount @relation(fields: [accountId], references: [id])
+}
+
+model Ledger {
+  id         Int    @id @default(autoincrement())
+  accountId  Int
+  date       DateTime
+  debit      Float @default(0)
+  credit     Float @default(0)
+  balance    Float
+
+  account    ChartOfAccount @relation(fields: [accountId], references: [id])
+academicYear  AcademicYear @relation(fields: [academicYearId], references: [id])
+  academicYearId Int
+  term          Term         @relation(fields: [termId], references: [id])
+  termId        Int
 }

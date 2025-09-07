@@ -50,17 +50,23 @@ const SchoolPage: React.FC = () => {
     setLoading(true);
     // simple client-side validation
     const user = getAuth();
-    if (!form.username || !form.username.trim()) { setMessage({ type: 'error', text: 'Username is required' }); return; }
-    if (!form.name || !form.name.trim()) { setMessage({ type: 'error', text: 'School name is required' }); return; }
+
+    if (!form.name || !form.name.trim()) 
+      {
+      setMessage({ type: 'error', text: 'School name is required' });
+      return;
+    }
     const payload = { ...form, establishedDate: form.establishedDate || null };
-    if (userName) payload.userName = userName;
+     
   setMessage({ type: 'info', text: editingId ? 'Updating...' : 'Creating...' });
   payload.username = user.username;
   const res = await apiFetch('/api/schools', { method: editingId ? 'PUT' : 'POST', body: JSON.stringify(editingId ? { id: editingId, ...payload } : payload) });
-    const result = await res.json().catch(() => ({}));
+   
+  
+  const result = await res.json().catch(() => ({}));
     if (!res.ok) {
       const serverMsg = result && typeof result === 'object' ? ((result as any).error || (result as any).message || JSON.stringify(result)) : String(result);
-      setMessage({ type: 'error', text: serverMsg || 'Server error' });
+      setMessage({ type: 'error', text: serverMsg || 'Invalid data, check and try again' });
       setLoading(false);
       return;
     }
@@ -128,7 +134,7 @@ const SchoolPage: React.FC = () => {
         <h2 className="text-2xl font-bold mb-4">Schools</h2>
         {loading && <LoadingSpinner />}
         <form onSubmit={handleSubmit} className="mb-6 grid grid-cols-1 md:grid-cols-2 gap-3">
-          <input value={form.username} onChange={e => setForm({ ...form, username: e.target.value })} placeholder="Username" className="border p-2 rounded" required />
+      
           <input value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} placeholder="Name" className="border p-2 rounded" required />
           <input value={form.address} onChange={e => setForm({ ...form, address: e.target.value })} placeholder="Address" className="border p-2 rounded" />
           <input value={form.contactInfo} onChange={e => setForm({ ...form, contactInfo: e.target.value })} placeholder="Contact Info" className="border p-2 rounded" />
