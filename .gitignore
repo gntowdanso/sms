@@ -12,7 +12,8 @@
 
 # testing
 /coverage
-prisma/
+prisma/*.db
+prisma/*.db-journal
 
 # misc
 .DS_Store
@@ -35,3 +36,15 @@ yarn-error.log*
 next-env.d.ts
 
 .vercel
+
+# Next.js build output
+.next/
+out/
+
+# Production builds
+build/
+dist/
+
+# Editor
+.vscode/
+Thumbs.db
